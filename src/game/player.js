@@ -5,6 +5,44 @@ import { GAME_CONFIG } from "./config.js";
 import { collides } from "./world.js";
 import { logger } from "./logger.js";
 
+/**
+ * カメラのヨー角から、地面平面上の前方ベクトルを求める。
+ * Three.js カメラの前方(-Z)に合わせるため Z はマイナス向きになる。
+ * @param {number} yaw
+ */
+export function computeForwardVector(yaw) {
+  return new THREE.Vector2(Math.sin(yaw), -Math.cos(yaw));
+}
+
+/**
+ * 前方ベクトルから右方向ベクトルを求める。
+ * @param {THREE.Vector2} forward
+ */
+export function computeRightVector(forward) {
+  return new THREE.Vector2(-forward.y, forward.x);
+}
+
+/**
+ * 入力軸と向きから移動要求ベクトルを求める。
+ * @param {number} yaw
+ * @param {number} inputX
+ * @param {number} inputY
+ * @param {number} speed
+ */
+export function computeWishVelocity(yaw, inputX, inputY, speed) {
+  const move = new THREE.Vector2(inputX, inputY);
+  if (move.lengthSq() === 0) {
+    return { x: 0, z: 0 };
+  }
+  move.normalize();
+  const forward = computeForwardVector(yaw);
+  const right = computeRightVector(forward);
+  return {
+    x: (forward.x * move.y + right.x * move.x) * speed,
+    z: (forward.y * move.y + right.y * move.x) * speed
+  };
+}
+
 export class PlayerController {
   constructor() {
     this.position = new THREE.Vector3(0, 0, 0);
@@ -41,11 +79,9 @@ export class PlayerController {
     if (input.isDown("KeyD")) move.x += 1;
 
     if (move.lengthSq() > 0) {
-      move.normalize();
-      const forward = new THREE.Vector2(Math.sin(this.yaw), Math.cos(this.yaw));
-      const right = new THREE.Vector2(forward.y, -forward.x);
-      const wishX = (forward.x * move.y + right.x * move.x) * cfg.moveSpeed;
-      const wishZ = (forward.y * move.y + right.y * move.x) * cfg.moveSpeed;
+      const velocity = computeWishVelocity(this.yaw, move.x, move.y, cfg.moveSpeed);
+      const wishX = velocity.x;
+      const wishZ = velocity.z;
       this.applyWalk(wishX * dt, wishZ * dt);
     }
 
@@ -77,14 +113,28 @@ export class PlayerController {
    * @param {number} dz
    */
   applyWalk(dx, dz) {
+    // 1フレーム移動を分割し、壁角での食い込みによる見た目ワープを減らす。
     const radius = GAME_CONFIG.player.radius;
-    const nx = this.position.x + dx;
-    if (!collides(nx, this.position.z, radius)) {
-      this.position.x = nx;
-    }
-    const nz = this.position.z + dz;
-    if (!collides(this.position.x, nz, radius)) {
-      this.position.z = nz;
+    const totalDistance = Math.hypot(dx, dz);
+    const maxStep = 0.08;
+    const stepCount = Math.max(1, Math.ceil(totalDistance / maxStep));
+    const stepX = dx / stepCount;
+    const stepZ = dz / stepCount;
+
+    for (let i = 0; i < stepCount; i += 1) {
+      const nx = this.position.x + stepX;
+      if (!collides(nx, this.position.z, radius)) {
+        this.position.x = nx;
+      } else {
+        logger.debug("X軸移動を壁衝突で停止", { key: "player-collision-x", throttleMs: 150 });
+      }
+
+      const nz = this.position.z + stepZ;
+      if (!collides(this.position.x, nz, radius)) {
+        this.position.z = nz;
+      } else {
+        logger.debug("Z軸移動を壁衝突で停止", { key: "player-collision-z", throttleMs: 150 });
+      }
     }
   }
 

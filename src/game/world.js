@@ -107,7 +107,11 @@ export function collides(x, z, radius) {
     { x: -radius, z: -radius },
     { x: radius, z: -radius },
     { x: -radius, z: radius },
-    { x: radius, z: radius }
+    { x: radius, z: radius },
+    { x: -radius, z: 0 },
+    { x: radius, z: 0 },
+    { x: 0, z: -radius },
+    { x: 0, z: radius }
   ];
   return sample.some((offset) => isWallAt(x + offset.x, z + offset.z));
 }
