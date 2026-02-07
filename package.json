@@ -1,0 +1,23 @@
+{
+  "name": "fps-base",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node tests/game.test.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "three": "^0.181.1",
+    "vue": "^3.5.27"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.1",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.12"
+  }
+}

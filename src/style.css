@@ -1,0 +1,111 @@
+﻿:root {
+  color-scheme: light;
+  --bg-0: #0d111a;
+  --bg-1: #1b2336;
+  --panel: rgba(11, 16, 27, 0.72);
+  --line: rgba(255, 255, 255, 0.24);
+  --text: #ecf0f4;
+  --accent: #f08b3d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", sans-serif;
+  background: radial-gradient(circle at 20% 0%, var(--bg-1), var(--bg-0) 62%);
+  color: var(--text);
+}
+
+.game-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.viewport {
+  width: 100%;
+  height: 100%;
+}
+
+.crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  margin-top: -11px;
+  pointer-events: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: #ffffff;
+}
+
+.crosshair::before {
+  left: 10px;
+  top: 0;
+  width: 2px;
+  height: 22px;
+}
+
+.crosshair::after {
+  left: 0;
+  top: 10px;
+  width: 22px;
+  height: 2px;
+}
+
+.hud {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  min-width: 300px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  backdrop-filter: blur(6px);
+  padding: 12px 14px;
+}
+
+.hud h1 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+
+.hud p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.notice {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .hud {
+    min-width: 0;
+    width: calc(100% - 32px);
+  }
+}
